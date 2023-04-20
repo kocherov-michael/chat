@@ -1,8 +1,9 @@
 import { makeAutoObservable } from "mobx"
 
-const myWs = new WebSocket('ws://192.168.1.63:9000');
+console.log('location:', window.location)
+const wsProptocol = window.location.protocol === 'http:' ? 'ws:' : 'wss:'
+const myWs = new WebSocket(`${wsProptocol}//${window.location.hostname}:9000`);
 
-console.log('+++', process.env)
 
 function wsSendAuth(auth) {
     myWs.send(JSON.stringify({action: "auth", ...auth}));
