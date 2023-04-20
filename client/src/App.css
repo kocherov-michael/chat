@@ -1,0 +1,37 @@
+.chatPageWrapper {
+  display: flex;
+  border: 1px solid red;
+  min-height: 70vh;
+}
+.contacts {
+  flex-basis: 150px;
+  background-color: rgb(255, 255, 218);
+  padding: 8px;
+}
+.chat {
+  flex: 1;
+  background-color: rgb(219, 219, 219);
+  padding: 8px;
+  display: flex;
+  flex-direction: column; 
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .App-logo {
+    animation: App-logo-spin infinite 20s linear;
+  }
+}
+
+button {
+  margin: 10px;
+  padding: 10px;
+}
+
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
