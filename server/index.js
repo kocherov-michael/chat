@@ -1,6 +1,6 @@
 const WebSocket = require('ws');
-const fs = require('fs')
-const http = require("http");
+// const fs = require('fs')
+// const http = require("http");
 const express = require('express')
 const path = require('path')
 // const host = 'localhost';
@@ -24,7 +24,7 @@ const port = process.env.PORT || 8081
 // app.use(bodyParser.json())
 console.log(__dirname, '../client/build')
 console.log(path.join(__dirname, '../client/build'))
-console.log(express.static(path.join(__dirname, '../client/build')))
+// console.log(express.static(path.join(__dirname, '../client/build')))
 
 app.use('/', express.static(path.join(__dirname, '../client/build')))
 app.use('/chat', express.static(path.join(__dirname, '../client/build')))
@@ -40,41 +40,44 @@ const wsServer = new WebSocket.Server({port: 9000});
 wsServer.on('connection', onConnect);
 
 const clients = {}
+let users = []
 
-fs.access("usersFile.txt", function(error){
-  if (error) {
-      console.log("Файл не найден");
-      fileHandler()
-  } else {
-      console.log("Файл найден");
-  }
-});
+// fs.access("usersFile.txt", function(error){
+//   if (error) {
+//       console.log("Файл не найден");
+//       fileHandler()
+//   } else {
+//       console.log("Файл найден");
+//   }
+// });
 
-function fileHandler() {
-  fs.open('usersFile.txt', 'w', (err) => {
-    if (err) throw err;
-    console.log('file created')
-  })
-}
+// function fileHandler() {
+//   fs.open('usersFile.txt', 'w', (err) => {
+//     if (err) throw err;
+//     console.log('file created')
+//   })
+// }
 
 function fileRead(callback) {
-  fs.readFile('usersFile.txt', 'utf8', (err, data) => {
-    if (err) throw err
-    let parsedData
-    try {
-      parsedData = JSON.parse(data)
-    } catch (e) {
-      console.log(e)
-    }
-    callback(parsedData)
-  })
+  callback(users)
+  // fs.readFile('usersFile.txt', 'utf8', (err, data) => {
+  //   if (err) throw err
+  //   let parsedData
+  //   try {
+  //     parsedData = JSON.parse(data)
+  //   } catch (e) {
+  //     console.log(e)
+  //   }
+  //   callback(parsedData)
+  // })
 }
 function fileWrite(data) {
-  fs.writeFile('usersFile.txt', JSON.stringify(data), (err) => {
-    if (err) throw err
+  users = [...data]
+  // fs.writeFile('usersFile.txt', JSON.stringify(data), (err) => {
+  //   if (err) throw err
 
-    console.log('Saved')
-  })
+  //   console.log('Saved')
+  // })
 }
 
 function onConnect(wsClient) {
@@ -83,9 +86,9 @@ function onConnect(wsClient) {
     wsClient.send(JSON.stringify('подключение успешно'));
     wsClient.on('message', function(message) {
         try {
-            // console.log('message:',message)
-            // сообщение пришло текстом, нужно конвертировать в JSON-формат
+          // сообщение пришло текстом, нужно конвертировать в JSON-формат
             const jsonMessage = JSON.parse(message);
+            console.log('jsonMessage:',jsonMessage)
             switch (jsonMessage.action) {
               case 'auth':
                 fileRead((users = []) => {
@@ -125,13 +128,18 @@ function onConnect(wsClient) {
                   if (user) {
                     if (jsonMessage.to) {
                       try {
-                        clients[jsonMessage.to].send(JSON.stringify(
-                          {
-                            type: 'msg',
-                            from: user,
-                            message: jsonMessage.message,
-                          }
-                        ));
+                        if (clients[jsonMessage.to]) {
+
+                          clients[jsonMessage.to].send(JSON.stringify(
+                            {
+                              type: 'msg',
+                              from: user,
+                              message: jsonMessage.message,
+                            }
+                          ));
+                        } else {
+                          wsClient.send(JSON.stringify({ type: 'alert', message: 'получатель оффлайн' }));
+                        }
                       } catch (e) {
                         console.log(e)
                         wsClient.send(JSON.stringify({ type: 'alert', message: 'не получается' }));

@@ -4,7 +4,6 @@ console.log('location:', window.location)
 const wsProptocol = window.location.protocol === 'http:' ? 'ws:' : 'wss:'
 const myWs = new WebSocket(`${wsProptocol}//${window.location.hostname}:9000`);
 
-
 function wsSendAuth(auth) {
     myWs.send(JSON.stringify({action: "auth", ...auth}));
 }
